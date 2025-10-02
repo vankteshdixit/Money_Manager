@@ -1,5 +1,6 @@
 package vanktesh.example.Money_Manager.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import vanktesh.example.Money_Manager.dto.ProfileDTO;
 import vanktesh.example.Money_Manager.entity.ProfileEntity;
 import vanktesh.example.Money_Manager.repository.ProfileRepository;
@@ -13,6 +14,7 @@ import java.util.UUID;
 public class ProfileService {
     private final ProfileRepository profileRepository;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
         ProfileEntity newProfile = toEntity(profileDTO);
@@ -33,6 +35,7 @@ public class ProfileService {
                 .id(profileDTO.getId())
                 .fullName(profileDTO.getFullName())
                 .email(profileDTO.getEmail())
+                .password(passwordEncoder.encode(profileDTO.getPassword()))
                 .password(profileDTO.getPassword())
                 .profileImageUrl(profileDTO.getProfileImageUrl())
                 .createdAt(profileDTO.getCreatedAt())

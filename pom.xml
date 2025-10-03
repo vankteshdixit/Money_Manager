@@ -27,6 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
+<!--		<jjwt.version>0.11.5</jjwt.version>-->
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
@@ -56,17 +57,17 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.11.5</version>
+			<version>0.12.6</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.11.5</version>
+			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-jackson</artifactId>
+			<artifactId>jjwt-jackson</artifactId> <!-- for JSON serialization/deserialization -->
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>

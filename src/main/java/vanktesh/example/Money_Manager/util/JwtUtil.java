@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -72,7 +73,7 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public boolean validateToken(String token, String username) {
+    public boolean validateToken(String token, UserDetails username) {
         try {
             String tokenUsername = extractUsername(token);
             return tokenUsername != null && tokenUsername.equals(username);

@@ -106,10 +106,11 @@ public class ProfileService {
             if (p == null) {
                 throw new RuntimeException("No user with email: " + authDTO.getEmail());
             }
-            System.out.println("DB password (encoded): " + p.getPassword());
-            System.out.println("raw password: " + authDTO.getPassword());
-            System.out.println("matches? " + passwordEncoder.matches(authDTO.getPassword(), p.getPassword()));
-            System.out.println("isActive? " + p.getIsActive());
+//            System.out.println("DB password (encoded): " + p.getPassword());
+//            System.out.println("raw password: " + authDTO.getPassword());
+//            System.out.println("matches? " + passwordEncoder.matches(authDTO.getPassword(), p.getPassword()));
+//            System.out.println("isActive? " + p.getIsActive());
+
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDTO.getEmail(), authDTO.getPassword()));
 //            Generate the JWT token
             String token = jwtUtil.generateToken(authDTO.getEmail());
@@ -118,7 +119,7 @@ public class ProfileService {
                     "user", getPublicProfile(authDTO.getEmail())
             );
         }catch (Exception e){
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new RuntimeException("Invalid email or password");
         }
     }

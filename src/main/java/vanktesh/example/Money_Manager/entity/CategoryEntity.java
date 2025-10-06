@@ -1,7 +1,7 @@
 package vanktesh.example.Money_Manager.entity;
 
-
 import jakarta.persistence.*;
+import jdk.jfr.Enabled;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,33 +12,31 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_profiles")
+@Table(name = "tbl_category")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProfileEntity {
+public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String fullName;
-    @Column(unique = true)
-    private String email;
-    private String password;
-    private String profileImageUrl;
+
+    private String name;
+
     @Column(updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-    private Boolean isActive;
-    private String activationToken;
 
-    @PrePersist
-    public void prePersist(){
-        if(this.isActive == null){
-            isActive = false;
-        }
-    }
+    private String icon;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_id", nullable = false)
+    private ProfileEntity profile;
+
+    //    Income type or the expense type
+    private String type;
 }

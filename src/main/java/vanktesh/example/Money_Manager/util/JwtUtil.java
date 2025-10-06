@@ -1,8 +1,8 @@
 package vanktesh.example.Money_Manager.util;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,13 +20,16 @@ public class JwtUtil {
 
     private final SecretKey secretKey;
 
-    public JwtUtil(@Value("${jwt.secret:default_super_secret_key_must_be_long_enough_32_chars}") String secret) {
-        // For HS256 the key must be at least 256 bits (32 bytes / chars)
+    /**
+     * Read secret from application.properties (fallback provided).
+     * For HS256 the key should be at least 32 bytes/characters.
+     */
+    public JwtUtil(@Value("${jwt.secret}") String secret) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
-     * Generate token with subject only (no expiry)
+     * Generate token with subject only (no expiry).
      */
     public String generateToken(String subject) {
         return Jwts.builder()
@@ -37,7 +40,7 @@ public class JwtUtil {
     }
 
     /**
-     * Generate token with subject + custom claims (no expiry)
+     * Generate token with subject + custom claims (no expiry).
      */
     public String generateToken(String subject, Map<String, Object> claims) {
         return Jwts.builder()
@@ -49,16 +52,15 @@ public class JwtUtil {
     }
 
     /**
-     * Parse and return Claims (uses jjwt 0.12.6 style parser)
+     * Parse and return all claims from a signed JWT (JWS) using jjwt 0.11.5 API.
+     * Throws RuntimeException on invalid token (caller should handle).
      */
     private Claims extractAllClaims(String token) {
         try {
-            // Use parser().verifyWith(key).build().parseSignedClaims(token).getPayload()
             return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (JwtException e) {
             throw new RuntimeException("Invalid JWT token", e);
         }
@@ -73,10 +75,15 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public boolean validateToken(String token, UserDetails username) {
+    /**
+     * Validate token by comparing the token subject to the provided UserDetails.username.
+     * No expiry check (tokens do not include expiry per your request).
+     */
+    public boolean validateToken(String token, UserDetails userDetails) {
         try {
             String tokenUsername = extractUsername(token);
-            return tokenUsername != null && tokenUsername.equals(username);
+            if (tokenUsername == null) return false;
+            return tokenUsername.equals(userDetails.getUsername());
         } catch (Exception e) {
             return false;
         }

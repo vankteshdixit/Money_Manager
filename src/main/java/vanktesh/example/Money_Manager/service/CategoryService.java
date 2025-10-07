@@ -9,6 +9,8 @@ import vanktesh.example.Money_Manager.entity.CategoryEntity;
 import vanktesh.example.Money_Manager.entity.ProfileEntity;
 import vanktesh.example.Money_Manager.repository.CategoryRepository;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,32 @@ public class CategoryService {
         newCategory = categoryRepository.save(newCategory);
 //        System.out.println("jkjyg");
         return toDTO(newCategory);
+    }
+
+//    get categories for current user
+
+    public List<CategoryDTO> getCategoriesForCurrentUser(){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<CategoryEntity> categories = categoryRepository.findByProfileId(profile.getId());
+        return categories.stream().map(this::toDTO).toList();
+    }
+//    get categories byType for current user
+    public List<CategoryDTO> getCategoriesByTypeForCurrentUser(String type){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<CategoryEntity> entities = categoryRepository.findByTypeAndProfileId(type, profile.getId());
+        return entities.stream().map(this::toDTO).toList();
+    }
+
+//    for update the category
+    public CategoryDTO updateCategory(Long categortId, CategoryDTO dto){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        CategoryEntity existingCategory = categoryRepository.findByIdAndProfileId(categortId, profile.getId())
+                .orElseThrow(() -> new RuntimeException("Category not accessible"));
+        existingCategory.setName(dto.getName());
+        existingCategory.setIcon(dto.getIcon());
+        existingCategory.setType(dto.getType());
+        existingCategory = categoryRepository.save(existingCategory);
+        return toDTO(existingCategory);
     }
 
 //    helper methods

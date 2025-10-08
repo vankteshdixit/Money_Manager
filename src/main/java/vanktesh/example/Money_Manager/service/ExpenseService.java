@@ -1,6 +1,9 @@
 package vanktesh.example.Money_Manager.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vanktesh.example.Money_Manager.dto.ExpenseDTO;
 import vanktesh.example.Money_Manager.entity.CategoryEntity;
@@ -63,6 +66,20 @@ public class ExpenseService {
         BigDecimal total = expenseRepository.findTotalExpenseByProfileId(profile.getId());
         return total != null ? total: BigDecimal.ZERO;
     }
+
+//    filter expenses
+    public List<ExpenseDTO> filterExpenses(LocalDate startDate, LocalDate endDate, String keyword, Sort sort){
+        ProfileEntity profile = profileService.getCurrentProfile();
+        List<ExpenseEntity> list = expenseRepository.findByProfileIdAndDateBetweenAndNameContainingIgnoreCase(profile.getId(),startDate, endDate, keyword, sort);
+        return list.stream().map(this::toDTO).toList();
+    }
+
+//    Notifications
+    public List<ExpenseDTO> getExpensesForUserOnDate(Long profileId, LocalDate date){
+        List<ExpenseEntity> list = expenseRepository.findByProfileIdAndDate(profileId, date);
+        return list.stream().map(this::toDTO).toList();
+    }
+
 
 //    helper
     private ExpenseEntity toEntity(ExpenseDTO dto, ProfileEntity profile, CategoryEntity category){

@@ -62,6 +62,15 @@ public class NotificationService {
         log.info("Job completed: sendDailyIncomeExpenseRemainder()");
 
     }
+    // Utility method to escape HTML special characters in text
+    private static String escapeHtml(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
 //    @Scheduled(cron ="0 0 23 * * *", zone = "IST")
 @Scheduled(cron ="0 0 23 * * *", zone = "IST")
     public void sendDailyExpenseSummary(){
@@ -71,20 +80,66 @@ public class NotificationService {
             List<ExpenseDTO> todayExpenses = expenseService.getExpensesForUserOnDate(profile.getId(), LocalDate.now(ZoneId.of("Asia/Kolkata")));
             if(!todayExpenses.isEmpty()) {
                 StringBuilder table = new StringBuilder();
-                table.append("<table style = 'border-collapse:collapse;width:100%;'>");
-                table.append("<tr style = 'background-color:#f2f2f2;'><th style = 'border:1px solid #ddd;padding:8px;'>Category</th><th style = 'border:1px solid #ddd;padding:8px;'>Date</th><th>");
-                int i= 1;
-                for (ExpenseDTO expense : todayExpenses){
-                    table.append("<tr>");
-                    table.append("<td style = 'border:1px solid #ddd;padding:8px;'>").append(i++).append("</td>");
-                    table.append("<td style = 'border:1px solid #ddd;padding:8px;'>").append(expense.getName()).append("</td>");
-                    table.append("<td style = 'border:1px solid #ddd;padding:8px;'>").append(expense.getAmount()).append("</td>");
-                    table.append("<td style = 'border:1px solid #ddd;padding:8px;'>").append(expense.getCategoryId() != null ? expense.getCategoryName():"N/A").append("</td>");
-                    table.append("</tr>");
+
+                table.append("<div style='font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:18px;'>");
+                table.append("  <div style='max-width:700px;margin:0 auto;padding:18px;background:#ffffff;border-radius:8px;box-shadow:0 4px 12px rgba(16,24,40,0.05);'>");
+
+// header
+                table.append("    <div style='display:flex;align-items:center;gap:12px;margin-bottom:14px;'>");
+                table.append("      <div style='width:44px;height:44px;border-radius:8px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;'>MM</div>");
+                table.append("      <div>");
+                table.append("        <div style='font-size:16px;font-weight:700;color:#111827;'>Daily Expense Summary</div>");
+                table.append("        <div style='font-size:13px;color:#6b7280;margin-top:2px;'>Summary for today</div>");
+                table.append("      </div>");
+                table.append("    </div>");
+
+// intro
+                table.append("    <p style='margin:6px 0 14px 0;color:#374151;font-size:14px;'>Hi " + escapeHtml(profile.getFullName()) + ",</p>");
+                table.append("    <p style='margin:0 0 18px 0;color:#6b7280;font-size:13px;'>Here is a summary of your expenses for today.</p>");
+
+// table wrapper (responsive)
+                table.append("    <div style='overflow-x:auto;'>");
+                table.append("      <table style='width:100%;border-collapse:collapse;table-layout:fixed;margin-top:12px;'>");
+
+// correctly defined header - MATCHES the number of columns in rows (4)
+                table.append("        <thead>");
+                table.append("          <tr>");
+                table.append("            <th style='text-align:left;padding:10px 12px;background:#f8fafc;color:#0f172a;font-weight:600;border-bottom:1px solid #e6eef8;width:6%;'>#</th>");
+                table.append("            <th style='text-align:left;padding:10px 12px;background:#f8fafc;color:#0f172a;font-weight:600;border-bottom:1px solid #e6eef8;width:44%;'>Name</th>");
+                table.append("            <th style='text-align:left;padding:10px 12px;background:#f8fafc;color:#0f172a;font-weight:600;border-bottom:1px solid #e6eef8;width:25%;'>Amount</th>");
+                table.append("            <th style='text-align:left;padding:10px 12px;background:#f8fafc;color:#0f172a;font-weight:600;border-bottom:1px solid #e6eef8;width:25%;'>Category</th>");
+                table.append("          </tr>");
+                table.append("        </thead>");
+
+// rows (logic EXACTLY the same as yours)
+                table.append("        <tbody>");
+                int i = 1;
+                for (ExpenseDTO expense : todayExpenses) {
+                    table.append("          <tr>");
+                    table.append("            <td style='padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;'>").append(i++).append("</td>");
+                    table.append("            <td style='padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;'>")
+                            .append(escapeHtml(expense.getName())).append("</td>");
+                    table.append("            <td style='padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;font-weight:600;'>")
+                            .append(expense.getAmount()).append("</td>");
+                    table.append("            <td style='padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;'>")
+                            .append(expense.getCategoryId() != null ? escapeHtml(expense.getCategoryName()) : "N/A").append("</td>");
+                    table.append("          </tr>");
                 }
-                table.append("</table>");
-                String body = "Hi "+profile.getFullName()+",<br/><br/> Here is a summary of your expenses for today:<br/><br/> " +table+"<br/><br/>Best regards, <br/> Money Manager Team";
-                emailService.sendEmail(profile.getEmail(), "Your daily expense summary", body);
+                table.append("        </tbody>");
+
+                table.append("      </table>");
+                table.append("    </div>"); // overflow-x
+
+// footer
+                table.append("    <div style='margin-top:16px;color:#6b7280;font-size:13px;'>");
+                table.append("      <p style='margin:0;'>Best regards,<br/>Money Manager Team</p>");
+                table.append("    </div>");
+
+                table.append("  </div>"); // card
+                table.append("</div>"); // container
+
+                String body = "Hi " + profile.getFullName() + ",<br/><br/> Here is a summary of your expenses for today:<br/><br/> "
+                        + table.toString() + "<br/><br/>Best regards, <br/> Money Manager Team";
             }
         }
         log.info("Job completed: sendDailyExpenseSummary()");

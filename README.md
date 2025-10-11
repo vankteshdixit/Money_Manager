@@ -1,4 +1,3 @@
-Money Manager
 Money Manager is a powerful and intuitive backend application designed to help you manage your personal finances with ease. Track your income and expenses, categorize your transactions, and gain insights into your spending habits to achieve your financial goals.
 
 Features

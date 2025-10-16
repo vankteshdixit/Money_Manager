@@ -16,6 +16,11 @@ public class EmailService {
     private String fromEmail;
 
     public void sendEmail(String to, String subject, String body){
+        if (fromEmail == null || fromEmail.isEmpty()) {
+            // skip email instead of throwing — log for debug
+            System.out.println("Email skipped (no fromEmail configured) -> to: " + to);
+            return;
+        }
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
